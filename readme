@@ -1,2 +1,14 @@
-paparakia
-babule
+Advanced Vision readme
+----------------------------
+
+Background removal and general cleaning-up of the image to separate the hand is
+currently working ok. Future work can be done on the threshold optimization for
+cleaning up.
+
+The next step is to create the bounding box.
+Removing the spurs (removeSpurs.m) can wait until it is trully needed.
+
+To find the bounding box the matlab function used in IVR which takes a binary
+image as input and returns objects based on properties like area can be used.
+
+The next step then would be moment invariants.
