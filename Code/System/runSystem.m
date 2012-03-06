@@ -19,9 +19,15 @@ for i = 3 : len
         [H,W] = size(binImage);
         [r,c] = find( bwperim(binImage,4) == 1 );
 
-        Image = cleanUp(binImage, 3, 0, 0); % second cleanup ?
+        cleanImage = cleanUp(binImage, 3, 0, 1); % second cleanup ?
+        [limage, regions] = bwLabel(cleanImage, 4);
+        
+        data = regionprops(limage,'Solidity','Eccentricity','Area','Centroid');
+        for k=1:length(data)
+            data(k).index = k;
+        end
 
-        [sr,sc] = removeSpurs(r,c,H,W,1);
+        %[sr,sc] = removeSpurs(r,c,H,W,1);
         %[tr,tc] = boundaryTrack(sr,sc,H,W,1);
 
         %boundingBox(binImage,1);
