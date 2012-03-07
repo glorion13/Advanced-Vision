@@ -8,6 +8,15 @@ for i = 3 : len
     folderDir = dir(folderName);
     imgCount = length(folderDir);
     
+    minX = 960;
+    minY = 540;
+    maxX = 0;
+    maxY = 0;
+    
+    boundaries = [minX minY maxX maxY];
+    MEI = zeros(540,960);
+    MHI = zeros(540,960);
+    
     for j = 3 : imgCount    
         imageDir = strcat(folderName,'/',folderDir(j).name);
         loadPath = imageDir(1:end-4);
@@ -17,19 +26,45 @@ for i = 3 : len
         binImage = getBinary(image,0,0,0,0,0);
 
         [H,W] = size(binImage);
-        [r,c] = find( bwperim(binImage,4) == 1 );
-
-        cleanImage = cleanUp(binImage, 3, 0, 1); % second cleanup ?
-        [limage, regions] = bwLabel(cleanImage, 4);
+        [r,c] = find(bwperim(binImage,4) == 1 );
         
-        data = regionprops(limage,'Solidity','Eccentricity','Area','Centroid');
-        for k=1:length(data)
-            data(k).index = k;
+        cleanImage = cleanUp(binImage, 2, 0, 0); % second cleanup ?
+        
+        [lImage, regions] = bwlabel(cleanImage, 4);
+        data = regionprops(lImage, cleanImage, 'Area', 'BoundingBox');
+        
+        areas = [data.Area];
+        maxAreaIndex = areas == max([data.Area]);
+        if ~isempty(maxAreaIndex)
+            boundingBox = data(maxAreaIndex).BoundingBox;
+            
+            boundaries = compareBoundingbox(boundaries, boundingBox);
+            boxedImage = keepBoundingbox(lImage, boundingBox);
+            
+            time = (j-3)*(255/(imgCount-3));
+            
+            MEI = overlayImages(MEI, boxedImage);
+            MHI = getMHI(MHI, boxedImage, time);
+            
+            
+            %figure(i)
+            %imshow(mat2gray(MHI))
+            %newImage = ismember(lImage, maxAreaIndex); 
+            %labeledDimeImage = bwlabel(newImage, 8);
+            
+            %TODO 
+            % gia na katharisoume to noise yparxei to open kai to close
+            % des episis erode kai delayed. 
+            % erevna gia invariants & feature vectors
+            % classifier
+            % cross validation
+            % check with & without each moment invariant
+            
         end
-
-        %[sr,sc] = removeSpurs(r,c,H,W,1);
-        %[tr,tc] = boundaryTrack(sr,sc,H,W,1);
-
-        %boundingBox(binImage,1);
     end
+    
+    muv = complexmoment(MHI,2,2)
+
+
+
 end
